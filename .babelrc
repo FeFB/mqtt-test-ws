@@ -1,0 +1,24 @@
+{
+	"env": {
+		"test_coverage": {
+			"presets": [
+				"es2015",
+				"stage-0"
+			]
+		}
+	},
+	"presets": [
+		"node7",
+		"stage-0",
+        "react"
+	],
+	"plugins": [
+		["module-resolver", {
+			"alias": {
+				"src": "./src",
+				"testing": "./testing",
+				"testingEnv": "./testing/environment"
+			}
+		}]
+	]
+}
