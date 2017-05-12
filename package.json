@@ -6,6 +6,7 @@
   "scripts": {
     "server": "clear && node server",
     "build": "clear && webpack --config webpack.config.js",
+    "app-mqtt": "clear && babel server/app-mqtt.js -d build && node build/server/app-mqtt.js",
     "app-ws": "clear && node server/app-ws.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
