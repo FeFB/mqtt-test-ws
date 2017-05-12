@@ -7,7 +7,7 @@ if(!iface) {
   console.log('Usage ' + process.argv[1] + " wlan0");
 }
 var wireless = new Wireless({
-  iface: 'wlp4s0',
+  iface: iface,
 	updateFrequency: 12, // Optional, seconds to scan for networks
   vanishThreshold: 7 // Optional, how many scans before network considered gone
 });
