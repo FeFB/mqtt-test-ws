@@ -11,17 +11,5 @@ var client = new RxMqtt(LOCAL);
 var teste = api.createCommand().wifiConnectionInfo().build().run();
 
 teste.getOutputObject().then(function(wifiInfo) {
-  console.log('Connection: ', wifiInfo);
+  console.log('Connection: ', wifiInfo.rssi);
 });
-
-function calculateSignalLevel(rssi, numLevels) {
-       if (rssi <= MIN_RSSI) {
-           return 0;
-       } else if (rssi >= MAX_RSSI) {
-           return numLevels - 1;
-       } else {
-            let inputRange = (MAX_RSSI - MIN_RSSI);
-            let outputRange = (numLevels - 1);
-           return ((rssi - MIN_RSSI) * outputRange / inputRange);
-       }
-   }
