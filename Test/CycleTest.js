@@ -49,14 +49,11 @@ export class CycleTest {
       fields: fields
     });
 
-    fs.writeFile('file.csv', csv, function(err) {
+    fs.writeFile('cvs/file.csv', csv, function(err) {
       if (err)
         throw err;
       console.log('file saved');
         let platform = process.platform;
-        if(platform === 'android') {
-          api.createCommand().share().setAction('send').setDefault(false).setTitle('text');
-        }
     });
 
 
