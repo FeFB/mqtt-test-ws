@@ -10,15 +10,24 @@ export class StaticsData {
    * @param  {int} amountPayload   [The Amount Payload requested]
    * @param  {int} periodOfPublish [Period in millisecond to send a payload]
    * @param  {int} timeTest        [TimeTest to completed the test]
+   * @param  {Double} ackAvg       [The Avarage time of a ACK in mS]
+   * @param  {int} payloadSent     [The amount of payload sent]
+   * @param  {long} startAt        [The start Time of test]
+   * @param  {long} endAt          [The end Time of test]
    */
-  constructor(qos, brokerIP, amountPayload, periodOfPublish, timeTest) {
+  constructor(qos, brokerIP, amountPayload, periodOfPublish, timeTest, ackAvg, payloadSent,
+  startAt, endAt, ) {
     this.qos = qos;
     this.brokerIP = brokerIP;
     this.amountPayload = amountPayload;
     this.periodOfPublish = periodOfPublish;
     this.timeTest = timeTest
-    this.avgTimePayload = 0;
-    this.amtPayloadSent = 0;
+    this.avgTimePayload = ackAvg;
+    this.amtPayloadSent = payloadSent;
+    this.startAt = startAt;
+    this.endAt = endAt;
+    this.elapsedTime = this.endAt - this.startAt;
+
   }
   /**
    * Return the values of all the props of the Object
@@ -26,7 +35,7 @@ export class StaticsData {
    */
   toString() {
 
-    return 'QoS: ' + this.qos + '\nBroker IP: ' + this.brokerIP + '\nAmount Pauload: ' + this.amountPayload +
+    return 'QoS: ' + this.qos + '\nBroker IP: ' + this.brokerIP + '\nAmount Payload: ' + this.amountPayload +
       '\nPeriod Of Publish: ' + this.periodOfPublish + '\nTime Test: ' + this.timeTest +
       '\nAVG Time Payload: ' + this.avgTimePayload + '\nAmount Payload Sent: ' + this.amtPayloadSent +
       '\nConnection level:' + this.connLevel + '\nStart At: ' + this.startAt + '\nEnd At: ' + this.endAt +
