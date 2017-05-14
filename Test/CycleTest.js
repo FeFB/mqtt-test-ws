@@ -49,7 +49,7 @@ export class CycleTest {
       fields: fields
     });
 
-    fs.writeFile('../storage/shared/file.csv', csv, function(err) {
+    fs.writeFile('../storage/shared/csv/file.csv', csv, function(err) {
       if (err)
         throw err;
       console.log('file saved');
