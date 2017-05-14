@@ -44,10 +44,11 @@ export class Test {
     //It will update some useInterfacef
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
-    console.log(process.platform);
-    let platform = process.platform; //android or linux
-    //WifiInfo
 
+    //android or linux
+    let platform = process.platform;
+
+    //WifiInfo, this library just works on Android (Termux and TermuxAPI)
     if (platform === 'android') {
       this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
       if (this.wifiInfo) {
