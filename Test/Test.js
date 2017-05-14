@@ -44,17 +44,19 @@ export class Test {
     //It will update some useInterfacef
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
-
     console.log(process.platform);
+    let platform = process.platform; //android or linux
     //WifiInfo
 
-    this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
-    if (this.wifiInfo) {
-      this.wifiInfo.getOutputObject().then((info) => {
-        console.log(info);
-        this.connection_dbm = info.rssi;
-        this.connection_level = info.rssi_level;
-      })
+    if (platform === 'android') {
+      this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
+      if (this.wifiInfo) {
+        this.wifiInfo.getOutputObject().then((info) => {
+          console.log(info);
+          this.connection_dbm = info.rssi;
+          this.connection_level = info.rssi_level;
+        })
+      }
     }
 
   }
@@ -105,8 +107,7 @@ export class Test {
       ? 0
       : (acc / this.pkgControlElapsed.size));
 
-    this.sd = new StaticsData(this.qos, this.brokerIP, this.amountPayload, this.periodOfPublish, this.timeTest,
-       ackAvg, this.sentCount, this.startAt, this.endAt, this.connection_dbm, this.connection_level);
+    this.sd = new StaticsData(this.qos, this.brokerIP, this.amountPayload, this.periodOfPublish, this.timeTest, ackAvg, this.sentCount, this.startAt, this.endAt, this.connection_dbm, this.connection_level);
 
     //  console.log(this.sd.toString());
   }
