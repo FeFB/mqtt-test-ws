@@ -52,7 +52,6 @@ export class Test {
       this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
       if (this.wifiInfo) {
         this.wifiInfo.getOutputObject().then((info) => {
-          console.log(info);
           this.connection_dbm = info.rssi;
           this.connection_level = info.rssi_level;
         })
