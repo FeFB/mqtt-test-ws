@@ -49,9 +49,9 @@ export class Test {
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
     //this.start();
-    this.startObs().subscribe(x => {
-      console.log(x);
-    }, null, () => console.log('Complete'));
+    this._startTest().subscribe(null, null, () => {
+      this._startRetrieve().subscribe();
+    });
 
   }
 
@@ -99,7 +99,7 @@ export class Test {
     this.sd = new StaticsData(this.qos, this.brokerIP, this.amountPayload, this.periodOfPublish,
       this.timeTest, ackAvg, this.pkgControlSent.size, this.startAt, this.endAt);
 
-    console.log(this.sd.toString());
+    //  console.log(this.sd.toString());
   }
 
   checkAllPayloadsWasSent(observer) {
@@ -111,6 +111,8 @@ export class Test {
 
       //buld StaticsData()
       this._buildStaticData();
+      this.client.end();
+
       //Set when close connnection is done
       this.client.on('close').subscribe(x => {
         //Complete and retrieve
@@ -118,19 +120,20 @@ export class Test {
         observer.complete();
       });
 
-      this.client.end();
+
     }
   };
 
-
-
-  startObs() {
+  _startTest() {
     return Observable.create((observer) => {
 
       if (this.state === START_TEST) {
+        this.clientId = "MQTT_TEST_" + new Date().getTime();
         // Create a Mqtt Connection with the brokerIP
-        this.client = new RxMqtt(this.brokerIP);
-
+        this.client = new RxMqtt(this.brokerIP, {
+          clientId: this.clientId
+        });
+        this.startAt = new Date().getTime();
         // Start Observable of TimeOut
         this.testTimeOutSub = this.testTimeOut_.subscribe(null, null, () => {
           console.log('Done');
@@ -143,7 +146,6 @@ export class Test {
 
           observer.next('Connected');
           //Time that test Start
-          this.startAt = new Date().getTime();
 
           this.client.publishWithInterval(this.periodOfPublish, this.amountPayload, this.getPayloadInfo.bind(this)).subscribe(null, (err) => console.log(err), () => {
             console.log('All publish request was sent');
@@ -194,4 +196,20 @@ export class Test {
     });
   }
 
+  _startRetrieve() {
+    return Observable.create((observer) => {
+      this.clientId = 'retrieve#' + this.clientId;
+      // Create a Mqtt Connection with the brokerIP
+      this.client = new RxMqtt(this.brokerIP, {
+        clientId: this.clientId
+      });
+
+      this.client.on('message').subscribe(x => {
+        //console.log('' + x.message);
+        this.sd.setDataFromBroker(x.message);
+        console.log(this.sd.toString());
+        this.client.end();
+      });
+    })
+  }
 }
