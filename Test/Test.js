@@ -1,22 +1,16 @@
-import {
-  RxMqtt
-} from 'reactivex-mqtt';
-import {
-  Observable,
-  Subject
-} from 'rxjs';
-import {
-  Util
-} from './Util';
+import {RxMqtt} from 'reactivex-mqtt';
+import {Observable, Subject} from 'rxjs';
+import {Util} from './Util';
 
-import {
-  StaticsData
-} from './StaticsData';
+import {StaticsData} from './StaticsData';
+
+var api = require('my-termux-api').default;
 
 /**
  * The Test Class responsible to connect MQTT, get times and listeners.
  */
-const START_TEST = 'start';
+const TEST_START = 'start';
+const TEST_RUNNING = 'running';
 
 export class Test {
   /**
@@ -27,15 +21,17 @@ export class Test {
    * @param  {int} periodOfPublish [Period in millisecond to send a payload]
    * @param  {int} timeTest        [TimeTest to completed the test]
    */
-  constructor(qos, brokerIP, amountPayload, periodOfPublish, timeTest) {
-    this.state = START_TEST;
+  constructor(obj) {
+    this.state = TEST_START;
 
-    this.qos = qos;
-    this.brokerIP = brokerIP;
-    this.amountPayload = amountPayload;
-    this.periodOfPublish = periodOfPublish;
-    this.timeTest = timeTest
+    this.qos = obj.qos;
+    this.brokerIP = obj.brokerIP;
+    this.amountPayload = obj.amountPayload;
+    this.periodOfPublish = obj.periodOfPublish;
+    this.timeTest = obj.timeTest
 
+    //
+    this.sentCount = 0;
 
     /* This logic can be done with one Map where pckControl[key] = Date.now - pkgControl[key] */
     this.pkgControlSent = new Map(); //Used to save the time that a key payload was sent
@@ -48,14 +44,21 @@ export class Test {
     //It will update some useInterfacef
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
-    //this.start();
-    this._startTest().subscribe(null, null, () => {
-      this._startRetrieve().subscribe();
-    });
+    //WifiInfo
+
+    this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
+    if (this.wifiInfo) {
+      this.wifiInfo.getOutputObject().then((info) => {
+        console.log(info);
+      })
+    }
 
   }
-
-
+  start(observer) {
+    this._startTest().subscribe(null, null, () => {
+      this._startRetrieve().subscribe(observer);
+    });
+  }
   getPayloadInfo() {
     let obj = {
       topic: 'MQTT_TESTE',
@@ -94,10 +97,11 @@ export class Test {
       acc = acc + elem;
     })
     // Ensure that will not have divison with zero
-    ackAvg = ((acc === 0) ? 0 : (acc / this.pkgControlElapsed.size));
+    ackAvg = ((acc === 0)
+      ? 0
+      : (acc / this.pkgControlElapsed.size));
 
-    this.sd = new StaticsData(this.qos, this.brokerIP, this.amountPayload, this.periodOfPublish,
-      this.timeTest, ackAvg, this.pkgControlSent.size, this.startAt, this.endAt);
+    this.sd = new StaticsData(this.qos, this.brokerIP, this.amountPayload, this.periodOfPublish, this.timeTest, ackAvg, this.sentCount, this.startAt, this.endAt);
 
     //  console.log(this.sd.toString());
   }
@@ -106,6 +110,8 @@ export class Test {
 
     //Check if the test is done before the timeOut
     if (this.pkgControlACK.size === this.amountPayload) {
+
+      this.testTimeOutSub.unsubscribe();
       //Calculat the elapse time of each ACK
       this._calculateElapse();
 
@@ -116,43 +122,62 @@ export class Test {
       //Set when close connnection is done
       this.client.on('close').subscribe(x => {
         //Complete and retrieve
-        this.testTimeOutSub.unsubscribe();
         observer.complete();
       });
-
 
     }
   };
 
+  _endForTimeOut(observer) {
+    this._calculateElapse();
+    this.client.end();
+    this._buildStaticData();
+
+    //Set when close connnection is done
+    this.client.on('close').subscribe(x => {
+      //Complete and retrieve
+      observer.complete();
+    });
+  }
+
   _startTest() {
     return Observable.create((observer) => {
 
-      if (this.state === START_TEST) {
+      if (this.state === TEST_START) {
+        //build a ID
         this.clientId = "MQTT_TEST_" + new Date().getTime();
         // Create a Mqtt Connection with the brokerIP
         this.client = new RxMqtt(this.brokerIP, {
-          clientId: this.clientId
+          clientId: this.clientId,
+          queueQoSZero: false
         });
-        this.startAt = new Date().getTime();
+
         // Start Observable of TimeOut
         this.testTimeOutSub = this.testTimeOut_.subscribe(null, null, () => {
-          console.log('Done');
-          this._calculateElapse();
-          observer.complete();
+          console.log('TimeOut');
+          this._endForTimeOut(observer);
         });
 
         //Observe a 'connect sucessful'
         this.client.on('connect').subscribe(x => {
 
-          observer.next('Connected');
-          //Time that test Start
+          if (this.state === TEST_START) {
+            //Get time when state was TEST_START
+            //It avoid that a reconnection reset the startAt
+            this.startAt = new Date().getTime();
+            //Change state, now the test will run
+            this.state = TEST_RUNNING;
+            console.log('Connected,  test state: ' + this.state);
+          }
 
+          //observer.next('Connected');
           this.client.publishWithInterval(this.periodOfPublish, this.amountPayload, this.getPayloadInfo.bind(this)).subscribe(null, (err) => console.log(err), () => {
-            console.log('All publish request was sent');
+            console.log('PublishWithInterval is done');
           });
 
           //Detect and record the time that a package was sent.
           this.client.onPacketSend('publish').subscribe((x) => {
+            this.sentCount++;
             // Get the packet's id
             let id = x.packet.messageId;
             //Check if the packet already was sent
@@ -170,6 +195,8 @@ export class Test {
               });
             }
 
+            //QoS == 0 will not receive a puback from Broker, so it will is save
+            //when is fired
             if (this.qos === 0) {
               this.pkgControlACK.set(id, new Date().getTime());
               this.checkAllPayloadsWasSent(observer);
@@ -190,6 +217,10 @@ export class Test {
             this.pkgControlACK.set(id, new Date().getTime());
             this.checkAllPayloadsWasSent(observer);
           });
+
+          this.client.on('reconnect').subscribe(x => console.log('Reconnect'));
+          this.client.on('error').subscribe(x => console.console.log('Error'));
+
         });
       } //if end
 
@@ -198,17 +229,20 @@ export class Test {
 
   _startRetrieve() {
     return Observable.create((observer) => {
+      // To broker identify that now is a Retrieve Mod
       this.clientId = 'retrieve#' + this.clientId;
       // Create a Mqtt Connection with the brokerIP
-      this.client = new RxMqtt(this.brokerIP, {
-        clientId: this.clientId
-      });
+      this.client = new RxMqtt(this.brokerIP, {clientId: this.clientId});
 
       this.client.on('message').subscribe(x => {
         //console.log('' + x.message);
         this.sd.setDataFromBroker(x.message);
-        console.log(this.sd.toString());
+        //console.log(this.sd.toString());
+        //The Observable is done
+        observer.next(this.sd.getObjForCsv());
+
         this.client.end();
+        observer.complete();
       });
     })
   }

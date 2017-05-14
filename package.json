@@ -4,7 +4,7 @@
   "description": "Testing MQTT protocol above an WebSocket Connection.",
   "main": "index.js",
   "scripts": {
-    "build-test": "babel Test -d build/Test", 
+    "build-test": "babel Test -d build/Test",
     "app-mqtt": "clear && npm run build-test && babel server/app-mqtt.js -d build && node build/server/app-mqtt.js",
     "app-ws": "clear && node server/app-ws.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/FeFB/mqtt-test-ws#readme",
   "dependencies": {
     "eventemitter3": "^2.0.3",
+    "json2csv": "^3.7.3",
     "my-termux-api": "0.0.2",
     "reactivex-mqtt": "0.0.4",
     "rxjs": "^5.3.1"
