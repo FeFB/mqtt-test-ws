@@ -49,7 +49,7 @@ export class CycleTest {
       fields: fields
     });
 
-    fs.writeFile('../storage/emulated/0/csv/file.csv', csv, function(err) {
+    fs.writeFile('../sdcard/Android/data/com.termux/file.csv', csv, function(err) {
       if (err)
         throw err;
       console.log('file saved');
