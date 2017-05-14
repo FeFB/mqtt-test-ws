@@ -22,7 +22,7 @@
   "dependencies": {
     "eventemitter3": "^2.0.3",
     "json2csv": "^3.7.3",
-    "my-termux-api": "0.0.2",
+    "my-termux-api": "0.0.4",
     "reactivex-mqtt": "0.0.4",
     "rxjs": "^5.3.1"
   },
