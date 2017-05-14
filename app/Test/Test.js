@@ -141,7 +141,7 @@ export class Test {
         //Observe a 'connect sucessful'
         this.client.on('connect').subscribe(x => {
 
-          observer.next(x);
+          observer.next('Connected');
           //Time that test Start
           this.startAt = new Date().getTime();
 
