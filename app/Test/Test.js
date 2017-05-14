@@ -13,7 +13,6 @@ import {
   StaticsData
 } from './StaticsData';
 
-var Wireless = require('wireless');
 /**
  * The Test Class responsible to connect MQTT, get times and listeners.
  */
