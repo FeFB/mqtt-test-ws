@@ -55,7 +55,7 @@ export class CycleTest {
       console.log('file saved');
         let platform = process.platform;
         if(platform === 'android') {
-          api.createCommand().share().setAction('send').setContentType('text/plain').setDefault(false).setTitle('text');
+          api.createCommand().share().setAction('send').setDefault(false).setTitle('text');
         }
     });
 
