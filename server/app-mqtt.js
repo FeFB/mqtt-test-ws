@@ -19,7 +19,7 @@ var values = {
   periodOfPublish: 20,
   timeTest: 90000
 }
-new CycleTest(33, values);
+new CycleTest(10, values);
 
 /*var teste = api.createCommand().wifiConnectionInfo().build().run();
 
