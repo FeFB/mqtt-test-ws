@@ -84,7 +84,7 @@ export class Test {
   _getPayloadInfo() {
     let obj = {
       topic: 'MQTT_TESTE',
-      payload: 'Oi',
+      payload: Util.payload,
       options: {
         qos: this.qos
       }

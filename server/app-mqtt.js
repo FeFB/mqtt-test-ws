@@ -15,11 +15,10 @@ const LOCAL = 'tcp://192.168.15.4:' + PORT;
 var values = {
   qos: 0,
   brokerIP: LOCAL,
-  amountPayload: 50,
-  periodOfPublish: 50,
+  amountPayload: 100,
+  periodOfPublish: 20,
   timeTest: 90000
 }
-
 new CycleTest(33, values);
 
 /*var teste = api.createCommand().wifiConnectionInfo().build().run();
