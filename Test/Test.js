@@ -15,6 +15,7 @@ const TEST_RUNNING = 'running';
 export class Test {
   /**
    * Make a new Test Constructor
+   * The Object has:
    * @param  {int} qos             [QoS Level for the test.]
    * @param  {String} brokerIP     [Broker's address used.]
    * @param  {int} amountPayload   [The Amount Payload requested]
@@ -30,7 +31,8 @@ export class Test {
     this.periodOfPublish = obj.periodOfPublish;
     this.timeTest = obj.timeTest
 
-    //
+    //It is to check how many times a publish was sent
+    //Some situation it will send more than requested
     this.sentCount = 0;
 
     /* This logic can be done with one Map where pckControl[key] = Date.now - pkgControl[key] */
@@ -44,7 +46,10 @@ export class Test {
     //It will update some useInterfacef
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
+  }
 
+  //It get the Wifi information (just for Android)
+  _setWifiInfo() {
     //android or linux
     let platform = process.platform;
 
@@ -58,14 +63,25 @@ export class Test {
         })
       }
     }
-
   }
+
+  /**
+   * It starts the test.
+   * @param  {function} getObserver It will return the Observer from your Parent class
+   * It'd need to be bind(this)
+   * @return {void}             nothing
+   */
   start(getObserver) {
     this._startTest().subscribe(null, null, () => {
       this._startRetrieve().subscribe(getObserver());
     });
   }
-  getPayloadInfo() {
+  /**
+   * Private methodo that has the information
+   * for each payload at a period. It'd use with bind(this)
+   * @return {Object} [Objet that has: (topic:String , payload: String/Buffer, options : Objet )]
+   */
+  _getPayloadInfo() {
     let obj = {
       topic: 'MQTT_TESTE',
       payload: 'Oi',
@@ -77,7 +93,7 @@ export class Test {
   }
 
   /**
-   * it Calculate the elapse Time for ACK and Time Test
+   * It calculates the elapsed Time for ACK and Time Test
    * @return {void}
    */
   _calculateElapse() {
@@ -93,7 +109,10 @@ export class Test {
       }
     });
   }
-
+  /**
+   * It creates the StaticsData Object with all infromation of the test
+   * @return {void} [nothing]
+   */
   _buildStaticData() {
 
     let ackAvg = 0;
@@ -109,10 +128,14 @@ export class Test {
 
     this.sd = new StaticsData(this.qos, this.brokerIP, this.amountPayload, this.periodOfPublish, this.timeTest, ackAvg, this.sentCount, this.startAt, this.endAt, this.connection_dbm, this.connection_level);
 
-    //  console.log(this.sd.toString());
   }
 
-  checkAllPayloadsWasSent(observer) {
+  /**
+   * It is called in every ack received to check if the test is done before the Test TimeOut
+   * @param  {Observer} observer [The Observer on the Sent Observable]
+   * @return {Void}          [nothing]
+   */
+  _checkAllPayloadsWasSent(observer) {
 
     //Check if the test is done before the timeOut
     if (this.pkgControlACK.size === this.amountPayload) {
@@ -134,6 +157,12 @@ export class Test {
     }
   };
 
+  /**
+   * If the Time Out is reached this function will
+   * collect the date from here.
+   * @param  {Observer} observer [Observer On sent Observable]
+   * @return {void}          [nothing]
+   */
   _endForTimeOut(observer) {
     this._calculateElapse();
     this.client.end();
@@ -146,6 +175,11 @@ export class Test {
     });
   }
 
+  /**
+   * It return a Observable with all the logic
+   * for the test (Connect, send publish in period, get the acks etc.)
+   * @return {[Observable]} [A stream with the test logic]
+   */
   _startTest() {
     return Observable.create((observer) => {
 
@@ -177,7 +211,7 @@ export class Test {
           }
 
           //observer.next('Connected');
-          this.client.publishWithInterval(this.periodOfPublish, this.amountPayload, this.getPayloadInfo.bind(this)).subscribe(null, (err) => console.log(err), () => {
+          this.client.publishWithInterval(this.periodOfPublish, this.amountPayload, this._getPayloadInfo.bind(this)).subscribe(null, (err) => console.log(err), () => {
             console.log('PublishWithInterval is done');
           });
 
@@ -205,7 +239,7 @@ export class Test {
             //when is fired
             if (this.qos === 0) {
               this.pkgControlACK.set(id, new Date().getTime());
-              this.checkAllPayloadsWasSent(observer);
+              this._checkAllPayloadsWasSent(observer);
             }
 
           });
@@ -214,14 +248,14 @@ export class Test {
           this.client.onPacketReceive('puback').subscribe(x => {
             let id = x.packet.messageId;
             this.pkgControlACK.set(id, new Date().getTime());
-            this.checkAllPayloadsWasSent(observer);
+            this._checkAllPayloadsWasSent(observer);
           });
 
           //Get the time when a PubComp arrives (the last one for QoS = 2)
           this.client.onPacketReceive('pubcomp').subscribe(x => {
             let id = x.packet.messageId;
             this.pkgControlACK.set(id, new Date().getTime());
-            this.checkAllPayloadsWasSent(observer);
+            this._checkAllPayloadsWasSent(observer);
           });
 
           this.client.on('reconnect').subscribe(x => console.log('Reconnect'));
@@ -232,7 +266,11 @@ export class Test {
 
     });
   }
-
+  /**
+   * It creates a Observable to get the information saved in the broker
+   * for the test
+   * @return {Observable} [A Stream with the Retrieve Logic]
+   */
   _startRetrieve() {
     return Observable.create((observer) => {
       console.log('Retreving');

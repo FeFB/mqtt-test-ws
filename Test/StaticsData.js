@@ -1,5 +1,3 @@
-var json2csv = require('json2csv');
-var fs = require('fs');
 
 /*
  * Class that manage the information about the test
@@ -17,6 +15,8 @@ export class StaticsData {
    * @param  {int} payloadSent     [The amount of payload sent]
    * @param  {long} startAt        [The start Time of test]
    * @param  {long} endAt          [The end Time of test]
+   * @param  {int} conn_dbm        [The connection Strength in dbm]
+   * @param  {int} conn_level      [The connection Strength in levels. 4 for max]
    */
   constructor(qos, brokerIP, amountPayload, periodOfPublish, timeTest, ackAvg, payloadSent, startAt, endAt, conn_dbm = 0, conn_level = 0) {
     this.qos = qos;
@@ -41,31 +41,13 @@ export class StaticsData {
 
     return 'QoS: ' + this.qos + '\nBroker IP: ' + this.brokerIP + '\nAmount Payload: ' + this.amountPayload + '\nPeriod Of Publish: ' + this.periodOfPublish + '\nTime Test: ' + this.timeTest + '\nAVG Time Payload: ' + this.avgTimePayload + '\nAmount Payload Sent: ' + this.amtPayloadSent + '\nConnection level:' + this.connLevel + '\nStart At: ' + this.startAt + '\nEnd At: ' + this.endAt + '\nElapsed time: ' + this.elapsedTime + '\nPayload AmntBroker: ' + this.payloadAmntBroker + '\nError Amnt Broker: ' + this.errorAmntBroker + '\nConnects Amnt Broker: ' + this.connectsAmntBroker + '\nStartAt Broker: ' + this.startAtBroker + '\nEndAt Broker: ' + this.endAtBroker;
   }
-  /**
-   * It is called to get currentTime and, if supported, the connectionLevel
-   * @return {void}
-   */
-  start() {
-    this.connLevel = ((navigator.connection)
-      ? navigator.connection.downlinkMax
-      : 'noSupport');
-    //this.connLevel = navigator.connection.downlinkMax;
-    this.startAt = new Date().getTime()
-  }
-  /**
-   * It is called to set the currentTime of the end test.
-   * @return {void}
-   */
-  end() {
-    this.endAt = new Date().getTime();
-    this.elapsedTime = this.endAt - this.startAt;
-  }
 
   /**
-   * It get a string with limiters, and it splits and set each variable related.
+   * It set each variable correctly from a broker String Retrieve with '#' limiters
    * @param {String} payload [A String with limiters]
    */
   setDataFromBroker(payload) {
+
     let payVec = payload.toString().split('#');
     this.payloadAmntBroker = payVec[0];
     this.errorAmntBroker = payVec[1];
@@ -73,10 +55,12 @@ export class StaticsData {
     this.startAtBroker = payVec[8];
     this.endAtBroker = payVec[9];
 
-  //  this.setCsv();
   }
 
-
+  /**
+ * Creates the Object with the value in the respective columns
+ * @return {Object} [Object used to save in .csv this StaticsData information]
+ */
   getObjForCsv() {
 
     let myValues = {
@@ -94,21 +78,6 @@ export class StaticsData {
 
     }
 
-    //console.log(myValues);
     return myValues;
   }
-
-  setCsv() {
-    var fields = ['broker_ip', 'qos', 'connection_dbm', 'connection_level', 'payload_test', 'payloadSaw_sent',
-                  'payload_broker', 'payload_broker', 'periodOfPublish', 'avgAck_time', 'timeOut', 'timeDone'];
-
-    var csv = json2csv({data: this.getCsv(), fields: fields});
-
-    fs.writeFile('file.csv', csv, function(err) {
-      if (err)
-        throw err;
-      console.log('file saved');
-    });
-  }
-
 }
