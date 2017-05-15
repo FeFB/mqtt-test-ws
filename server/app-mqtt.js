@@ -9,7 +9,7 @@ import {CycleTest} from '../Test';
 var api = require('my-termux-api').default;
 
 const PORT = 1883; // The Standard port for MQTT
-const LOCAL = 'tcp://192.168.15.4:' + PORT;
+const LOCAL = 'tcp://192.168.15.6:' + PORT;
 
 
 var values = {
