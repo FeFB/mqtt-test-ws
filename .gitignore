@@ -32,6 +32,9 @@ jspm_packages
 build
 dist
 
+#csv
+.csv
+
 # Optional npm cache directory
 .npm
 

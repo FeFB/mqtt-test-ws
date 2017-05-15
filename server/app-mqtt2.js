@@ -9,4 +9,4 @@ import {Util} from './Util';
  */
 var api = require('my-termux-api').default;
 
-new CycleTest(10, Util.valuesWifi);
+new CycleTest(10, Util.valuesCable);
