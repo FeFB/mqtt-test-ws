@@ -46,6 +46,8 @@ export class Test {
     //It will update some useInterfacef
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
+    this._setWifiInfo();
+
   }
 
   //It get the Wifi information (just for Android)
