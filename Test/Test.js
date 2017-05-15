@@ -60,9 +60,9 @@ export class Test {
     }
 
   }
-  start(observer) {
+  start(getObserver) {
     this._startTest().subscribe(null, null, () => {
-      this._startRetrieve().subscribe(observer);
+      this._startRetrieve().subscribe(getObserver());
     });
   }
   getPayloadInfo() {
@@ -235,6 +235,7 @@ export class Test {
 
   _startRetrieve() {
     return Observable.create((observer) => {
+      console.log('Retreving');
       // To broker identify that now is a Retrieve Mod
       this.clientId = 'retrieve#' + this.clientId;
       // Create a Mqtt Connection with the brokerIP
@@ -246,7 +247,6 @@ export class Test {
         //console.log(this.sd.toString());
         //The Observable is done
         observer.next(this.sd.getObjForCsv());
-
         this.client.end();
         observer.complete();
       });

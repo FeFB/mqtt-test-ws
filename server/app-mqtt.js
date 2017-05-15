@@ -15,8 +15,8 @@ const LOCAL = 'tcp://192.168.15.4:' + PORT;
 var values = {
   qos: 0,
   brokerIP: LOCAL,
-  amountPayload: 10,
-  periodOfPublish: 100,
+  amountPayload: 100,
+  periodOfPublish: 50,
   timeTest: 90000
 }
 
