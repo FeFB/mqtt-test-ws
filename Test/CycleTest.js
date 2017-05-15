@@ -111,7 +111,7 @@ export class CycleTest {
     // set QoS = 1
     this.setOfTest.qos = 2;
     // Star Test
-      console.log(NEW_TEST_LOG);
+    console.log(NEW_TEST_LOG);
     new Test(this.setOfTest).start(this.getObserver.bind(this));
   }
 
