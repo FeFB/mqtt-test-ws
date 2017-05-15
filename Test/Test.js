@@ -46,25 +46,8 @@ export class Test {
     //It will update some useInterfacef
     this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
 
-    this._setWifiInfo();
+    //this._setWifiInfo();
 
-  }
-
-  //It get the Wifi information (just for Android)
-  _setWifiInfo() {
-    //android or linux
-    let platform = process.platform;
-
-    //WifiInfo, this library just works on Android (Termux and TermuxAPI)
-    if (platform === 'android') {
-      this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
-      if (this.wifiInfo) {
-        this.wifiInfo.getOutputObject().then((info) => {
-          this.connection_dbm = info.rssi;
-          this.connection_level = info.rssi_level;
-        })
-      }
-    }
   }
 
   /**
@@ -74,6 +57,29 @@ export class Test {
    * @return {void}             nothing
    */
   start(getObserver) {
+
+    //android or linux
+    let platform = process.platform;
+
+    //WifiInfo, this library just works on Android (Termux and TermuxAPI)
+    if (platform === 'android') {
+      this.wifiInfo = api.createCommand().wifiConnectionInfo().build().run();
+      if (this.wifiInfo) {
+
+        //It will called when is done
+        this.wifiInfo.getOutputObject().then((info) => {
+          this.connection_dbm = info.rssi;
+          this.connection_level = info.rssi_level;
+
+          this._realStart(getObserver);
+        })
+      }
+    } else {
+      this._realStart(getObserver);
+    }
+  }
+
+  _realStart(getObserver) {
     this._startTest().subscribe(null, null, () => {
       this._startRetrieve().subscribe(getObserver());
     });
