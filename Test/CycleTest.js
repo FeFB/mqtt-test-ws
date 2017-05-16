@@ -134,7 +134,7 @@ export class CycleTest {
 
     //Columns Names
     var fields = ['broker_ip', 'qos', 'connection_dbm', 'connection_level', 'payload_test', 'payloadSaw_sent',
-      'payload_broker', 'payload_broker', 'periodOfPublish', 'avgAck_time', 'timeOut', 'timeDone'
+      'payload_broker', 'periodOfPublish', 'avgAck_time', 'timeOut', 'timeDone'
     ];
 
     //Buld Json to CSV
