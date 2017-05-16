@@ -9,6 +9,7 @@
     "app-mqtt-cable": "clear && babel server/app-mqtt-cable.js -d build && node build/server/app-mqtt-cable.js",
     "app-mqtt-aws": "clear && babel server/app-mqtt-aws.js -d build && node build/server/app-mqtt-aws.js",
     "app-ws": "clear && node server/app-ws.js",
+    "ping-pong": "clear && babel Test -d build/Test && babel server/app-mqtt-pingpong.js -d build && node build/server/app-mqtt-pingpong.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

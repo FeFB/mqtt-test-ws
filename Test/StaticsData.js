@@ -1,4 +1,3 @@
-
 /*
  * Class that manage the information about the test
  */
@@ -18,7 +17,7 @@ export class StaticsData {
    * @param  {int} conn_dbm        [The connection Strength in dbm]
    * @param  {int} conn_level      [The connection Strength in levels. 4 for max]
    */
-  constructor(qos, brokerIP, amountPayload, periodOfPublish, timeTest, ackAvg, payloadSent, startAt, endAt, conn_dbm = 0, conn_level = 0) {
+  constructor(qos, brokerIP, amountPayload = 0, periodOfPublish = 0, timeTest, ackAvg = 0, payloadSent, startAt = 0, endAt = 0, conn_dbm = 0, conn_level = 0) {
     this.qos = qos;
     this.brokerIP = brokerIP;
     this.amountPayload = amountPayload;
@@ -75,6 +74,20 @@ export class StaticsData {
       "avgAck_time": this.avgTimePayload, // The avarage of ack time
       "timeOut": this.timeTest, // The Time Out setted on the test
       "timeDone": this.elapsedTime // The elapsed time that test finish
+
+    }
+
+    return myValues;
+  }
+
+  getObjForCsvPingPong() {
+    let myValues = {
+      "broker_ip": this.brokerIP,
+      "qos": this.qos,
+      "connection_dbm": this.connection_dbm,
+      "connection_level": this.connection_level,
+      "payloadSaw_sent": this.amtPayloadSent, // The amount that client tried to send
+      "timeOut": this.timeTest // The Time Out setted on the test
 
     }
 

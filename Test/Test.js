@@ -106,7 +106,7 @@ export class Test {
 
     this.pkgControlSent.forEach((elem, id) => {
       if (this.pkgControlACK.has(id)) {
-        let elapsed = this.pkgControlACK.get(id) - this.pkgControlSent.get(id).time;
+        let elapsed = this.pkgControlACK.get(id) - this.pkgControlSent.get(id);
         this.pkgControlElapsed.set(id, elapsed);
         //console.log('Id: ' + id + 'Elapsed: ' + elapsed);
       }
@@ -222,27 +222,17 @@ export class Test {
             // Get the packet's id
             let id = x.packet.messageId;
             //Check if the packet already was sent
-            if (this.pkgControlSent.has(id)) {
-              //If alread sent, update the times variable.
-              let packet = this.pkgControlSent.get(id);
-              packet.times = packet.times++;
-              //Update packetControl variable
-              this.pkgControlSent.set(id, packet);
-            } else {
+            if (!this.pkgControlSent.has(id)) {
               //Create in the packetControl
-              this.pkgControlSent.set(id, {
-                time: new Date().getTime(), //time sent
-                times: 1, //first time
-              });
-            }
+              this.pkgControlSent.set(id, new Date().getTime());
 
-            //QoS == 0 will not receive a puback from Broker, so it will is save
-            //when is fired
-            if (this.qos === 0) {
-              this.pkgControlACK.set(id, new Date().getTime());
-              this._checkAllPayloadsWasSent(observer);
+              //QoS == 0 will not receive a puback from Broker, so it will is save
+              //when is fired
+              if (this.qos === 0) {
+                this.pkgControlACK.set(id, new Date().getTime());
+                this._checkAllPayloadsWasSent(observer);
+              }
             }
-
           });
 
           //Get the Time when a Puback arrives (the last one for QoS = 1)
@@ -258,9 +248,6 @@ export class Test {
             this.pkgControlACK.set(id, new Date().getTime());
             this._checkAllPayloadsWasSent(observer);
           });
-
-          this.client.on('reconnect').subscribe(x => console.log('Reconnect'));
-          this.client.on('error').subscribe(x => console.console.log('Error'));
 
         });
       } //if end
