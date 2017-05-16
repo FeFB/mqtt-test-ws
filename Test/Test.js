@@ -43,11 +43,6 @@ export class Test {
     //It will alert that the Test Time Out reached.
     this.testTimeOut_ = Observable.interval(this.timeTest).take(1).share();
 
-    //It will update some useInterfacef
-    this.timeCount_ = Observable.interval(1000).takeUntil(this.testTimeOut_);
-
-    //this._setWifiInfo();
-
   }
 
   /**
@@ -104,9 +99,9 @@ export class Test {
    * It calculates the elapsed Time for ACK and Time Test
    * @return {void}
    */
-  _calculateElapse() {
+  _calculateElapse(endAt) {
 
-    this.endAt = new Date().getTime();
+    this.endAt = endAt;
     this.elapseTimeTest = this.endAt - this.startAt;
 
     this.pkgControlSent.forEach((elem, id) => {
@@ -147,11 +142,9 @@ export class Test {
 
     //Check if the test is done before the timeOut
     if (this.pkgControlACK.size === this.amountPayload) {
-
-      this.testTimeOutSub.unsubscribe();
       //Calculat the elapse time of each ACK
-      this._calculateElapse();
-
+      this._calculateElapse(new Date().getTime());
+      this.testTimeOutSub.unsubscribe();
       //buld StaticsData()
       this._buildStaticData();
       this.client.end();
@@ -172,7 +165,7 @@ export class Test {
    * @return {void}          [nothing]
    */
   _endForTimeOut(observer) {
-    this._calculateElapse();
+    this._calculateElapse(new Date().getTime());
     this.client.end();
     this._buildStaticData();
 

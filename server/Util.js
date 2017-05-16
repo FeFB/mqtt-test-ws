@@ -1,6 +1,6 @@
 var values = {
   qos: 0,
-  brokerIP: 'tcp://192.168.15.4:1883',
+  brokerIP: 'toComplete',
   amountPayload: 10,
   periodOfPublish: 100,
   timeTest: 20000
@@ -13,6 +13,12 @@ export class Util {
   }
 
   static get valuesWifi() {
+    values.brokerIP = 'tcp://192.168.15.4:1883';
+    return values;
+  }
+
+  static get valesAWS() {
+    values.brokerIP = 'mqtt://34.208.230.82:1883'
     return values;
   }
 }

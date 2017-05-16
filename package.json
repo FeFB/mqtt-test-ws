@@ -4,9 +4,10 @@
   "description": "Testing MQTT protocol above an WebSocket Connection.",
   "main": "index.js",
   "scripts": {
-    "build-test": "babel Test -d build/Test &&  babel server/Util.js -d build",
-    "app-mqtt": "clear && npm run build-test && babel server/app-mqtt.js -d build  && node build/server/app-mqtt.js",
-    "app-mqtt2": "clear && npm run build-test && babel server/app-mqtt2.js -d build  && node build/server/app-mqtt2.js",
+    "build": "clear && babel Test -d build/Test &&  babel server/Util.js -d build",
+    "app-mqtt": "clear && babel server/app-mqtt.js -d build  && node build/server/app-mqtt.js",
+    "app-mqtt-cable": "clear && babel server/app-mqtt-cable.js -d build && node build/server/app-mqtt-cable.js",
+    "app-mqtt-aws": "clear && babel server/app-mqtt-aws.js -d build && node build/server/app-mqtt-aws.js",
     "app-ws": "clear && node server/app-ws.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
