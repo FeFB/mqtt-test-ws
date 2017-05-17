@@ -116,13 +116,7 @@ export class Test2 {
         // Create a Mqtt Connection with the brokerIP
         this.client = new RxMqtt(this.brokerIP, {
           clientId: this.clientId,
-          queueQoSZero: true
-        });
-
-        // Start Observable of TimeOut
-        this.testTimeOutSub = this.testTimeOut_.subscribe(null, null, () => {
-          console.log('TimeOut');
-          this._endForTimeOut(observer);
+          queueQoSZero: false
         });
 
         //Observe a 'connect sucessful'
@@ -134,10 +128,15 @@ export class Test2 {
             this.startAt = new Date().getTime();
             //Change state, now the test will run
             this.state = TEST_RUNNING;
-            if (this.qos === 0) {
-              this.client.subscribe('MQTT_TESTE_2');
-            }
+            this.client.subscribe('MQTT_TESTE_2');
             this._publish();
+
+            // Start Observable of TimeOut
+            this.testTimeOutSub = this.testTimeOut_.subscribe(null, null, () => {
+              console.log('TimeOut');
+              this._endForTimeOut(observer);
+            });
+
             console.log('Connected,  test state: ' + this.state);
           }
 
@@ -149,14 +148,6 @@ export class Test2 {
           this.client.on('message').subscribe((x) => {
             this._publish();
           });
-
-          if (this.qos === 1) {
-            this.client.onPacketReceive('puback').subscribe(x => this._publish())
-          }
-
-          if (this.qos === 2) {
-            this.client.onPacketReceive('pubcomp').subscribe(x => this._publish());
-          }
 
         });
       } //if end
