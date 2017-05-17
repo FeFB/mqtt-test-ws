@@ -7,7 +7,7 @@ import {StaticsData} from './StaticsData';
 var api = require('my-termux-api').default;
 
 /**
- * The Test Class responsible to connect MQTT, get times and listeners.
+ * The Test2 Class responsible to connect MQTT and does a ping pong test
  */
 const TEST_START = 'start';
 const TEST_RUNNING = 'running';
@@ -68,6 +68,7 @@ export class Test2 {
   _realStart(getObserver) {
     this._startTest().subscribe(getObserver());
   }
+
   /**
    * It creates the StaticsData Object with all infromation of the test
    * @return {void} [nothing]
@@ -133,7 +134,9 @@ export class Test2 {
             this.startAt = new Date().getTime();
             //Change state, now the test will run
             this.state = TEST_RUNNING;
-            this.client.subscribe('MQTT_TESTE_2');
+            if (this.qos === 0) {
+              this.client.subscribe('MQTT_TESTE_2');
+            }
             this._publish();
             console.log('Connected,  test state: ' + this.state);
           }
@@ -143,22 +146,16 @@ export class Test2 {
             this.sentCount++;
           });
 
-          if (this.qos === 0) {
-            this.client.on('message').subscribe((x) => {
-              this._publish();
-            });
+          this.client.on('message').subscribe((x) => {
+            this._publish();
+          });
+
+          if (this.qos === 1) {
+            this.client.onPacketReceive('puback').subscribe(x => this._publish())
           }
 
-          if(this.qos === 1) {
-            this.client.onPacketReceive('puback').subscribe(
-              x => this._publish()
-            )
-          }
-
-          if(this.qos === 2) {
-            this.client.onPacketReceive('pubcomp').subscribe(
-              x => this._publish()
-            );
+          if (this.qos === 2) {
+            this.client.onPacketReceive('pubcomp').subscribe(x => this._publish());
           }
 
         });
