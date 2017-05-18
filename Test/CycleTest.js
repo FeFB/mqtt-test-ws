@@ -34,6 +34,9 @@ export class CycleTest {
    */
   constructor(testAmount, setOfTest) {
 
+    //
+    this.brokerIP = setOfTest.brokerIP;
+
     //  ArrayList<StaticsData> It holds the staticsData of each test
     this.results = new Array();
     // ArrayList<StaticsData> It holds the staticsData of each test
@@ -189,6 +192,7 @@ export class CycleTest {
 
   _getRetrieve_() {
       console.log('_getRetrieve_' + this.results.length);
+
     if (this.results.length > 0) {
       let obj = this.results.pop();
       let clientId = 'retrieve#' + obj.clientId;
