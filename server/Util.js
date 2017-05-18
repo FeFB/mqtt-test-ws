@@ -3,7 +3,7 @@ var values = {
   brokerIP: 'toComplete',
   amountPayload: 10,
   periodOfPublish: 100,
-  timeTest: 10000
+  timeTest: 30000
 };
 
 export class Util {
