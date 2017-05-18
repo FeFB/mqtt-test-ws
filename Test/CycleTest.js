@@ -173,8 +173,10 @@ export class CycleTest {
       console.log('file saved');
     });
   }
+
+
   _retrieve() {
-    Observable.interval(1000).take(10).subscribe(
+    Observable.interval(1000).take(4).subscribe(
       (x) => {
         console.log('Retrieve in: ' + (x + 1) + '/10');
       },
@@ -186,7 +188,7 @@ export class CycleTest {
   }
 
   _getRetrieve_() {
-
+      console.log('_getRetrieve_' + this.results.length);
     if (this.results.length > 0) {
       let obj = this.results.pop();
       let clientId = 'retrieve#' + obj.clientId;
