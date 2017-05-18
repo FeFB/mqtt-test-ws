@@ -180,43 +180,38 @@ export class CycleTest {
       },
       null,
       () => {
-        this.results.forEach(elem => {
-          this._getRetrieve_(elem);
-        });
+        this._getRetrieve_()
       }
     )
   }
 
-  _getRetrieve_(obj, observerR) {
-      Observable.create((observer) => {
-      console.log('Retreving');
-      // To broker identify that now is a Retrieve Mod
+  _getRetrieve_() {
+
+    if (this.results.length > 0) {
+      let obj = this.results.pop();
       let clientId = 'retrieve#' + obj.clientId;
-      // Create a Mqtt Connection with the brokerIP
-      let client = new RxMqtt(this.brokerIP, {
+
+      this.client = new RxMqtt(this.brokerIP, {
         clientId: clientId
       });
 
-      client.on('message').subscribe(x => {
+      this.client.on('message').subscribe(x => {
         //console.log('' + x.message);
         obj.sd.setDataFromBroker(x.message);
         //console.log(this.sd.toString());
         //The Observable is done
-        observer.next(obj.sd.getObjForCsv());
-        client.end();
-        observer.complete();
-      });
-    }).subscribe(
-      (x) => {
-        this.resultsWithRetrieve.push(x);
+        this.resultsWithRetrieve.push(obj.sd.getObjForCsv());
         console.log('Push on resultsWithRetrieve');
-      },
-      null,
-      () => {
-        if (this.resultsWithRetrieve.length === this.results.length) {
-          this._saveDb();
-        }
-      }
-    );
+        this.client.end();
+      });
+
+      this.client.on('close').subscribe(
+        x => this._getRetrieve_()
+      );
+
+    } else {
+      this._saveDb();
+    }
+
   }
 }
