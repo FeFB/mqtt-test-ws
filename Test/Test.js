@@ -76,7 +76,7 @@ export class Test {
 
   _realStart(getObserver) {
     this._startTest().subscribe(null, null, () => {
-      this._startRetrieve().subscribe(getObserver());
+      this._startRetrieve(getObserver());
     });
   }
   /**
@@ -258,23 +258,14 @@ export class Test {
    * for the test
    * @return {Observable} [A Stream with the Retrieve Logic]
    */
-  _startRetrieve() {
-    return Observable.create((observer) => {
-      console.log('Retreving');
-      // To broker identify that now is a Retrieve Mod
-      this.clientId = 'retrieve#' + this.clientId;
-      // Create a Mqtt Connection with the brokerIP
-      this.client = new RxMqtt(this.brokerIP, {clientId: this.clientId});
-
-      this.client.on('message').subscribe(x => {
-        //console.log('' + x.message);
-        this.sd.setDataFromBroker(x.message);
-        //console.log(this.sd.toString());
-        //The Observable is done
-        observer.next(this.sd.getObjForCsv());
-        this.client.end();
-        observer.complete();
-      });
-    })
+  _startRetrieve(observer) {
+      let obj = {
+        state: 'WAIT_FOR_RETRIEVE',
+        clientId: this.clientId,
+        sd : this.sd
+      }
+      observer.next(obj);
+      observer.complete();
   }
+
 }

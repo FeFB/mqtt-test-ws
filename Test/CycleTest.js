@@ -6,6 +6,14 @@ import {
   Test
 } from './Test';
 
+import {
+  Observable
+} from 'rxjs';
+import {
+  RxMqtt
+} from 'reactivex-mqtt';
+
+
 var json2csv = require('json2csv');
 var fs = require('fs');
 var api = require('my-termux-api').default;
@@ -14,7 +22,6 @@ var api = require('my-termux-api').default;
 const STATE_QOS_ZERO = 'Qos_zero';
 const STATE_QOS_ONE = 'Qos_one';
 const STATE_QOS_TWO = 'Qos_two';
-
 
 const NEW_TEST_LOG = '=========================\nNew Test';
 export class CycleTest {
@@ -29,6 +36,8 @@ export class CycleTest {
 
     //  ArrayList<StaticsData> It holds the staticsData of each test
     this.results = new Array();
+    // ArrayList<StaticsData> It holds the staticsData of each test
+    this.resultsWithRetrieve = new Array();
     //  The aux Coun test
     this.countTest = 1;
     //  The Amount that was setted
@@ -65,7 +74,9 @@ export class CycleTest {
           } else if (this.state === STATE_QOS_ONE) {
             this._startQos_two();
           } else {
-            this._saveDb();
+            console.log('Calll _Retrieve()');
+            this._retrieve();
+            //this._saveDb();
           }
         }
       }
@@ -125,21 +136,32 @@ export class CycleTest {
     let date = new Date();
     let dateKey = date.getDay() + '_' + date.getMonth() + '_' + date.getHours() + ':' + date.getMinutes();
 
-    let nameOfFile = 'MQTT_TEST_' + dateKey + '_payload_' + this.setOfTest.amountPayload +
-      '_per_' + this.setOfTest.periodOfPublish + '.csv';
+    let nameOfFile = 'MQTT_TEST_' + dateKey + '_payload_' + this.setOfTest.amountPayload + '_per_' + this.setOfTest.periodOfPublish + '.csv';
 
     let forAndroid = '../storage/shared/csv/' + nameOfFile;
 
-    let file = ((platform === 'android') ? forAndroid : nameOfFile);
+    let file = ((platform === 'android') ?
+      forAndroid :
+      nameOfFile);
 
     //Columns Names
-    var fields = ['broker_ip', 'qos', 'connection_dbm', 'connection_level', 'payload_test', 'payloadSaw_sent',
-      'payload_broker', 'periodOfPublish', 'avgAck_time', 'timeOut', 'timeDone'
+    var fields = [
+      'broker_ip',
+      'qos',
+      'connection_dbm',
+      'connection_level',
+      'payload_test',
+      'payloadSaw_sent',
+      'payload_broker',
+      'periodOfPublish',
+      'avgAck_time',
+      'timeOut',
+      'timeDone'
     ];
 
     //Buld Json to CSV
     var csv = json2csv({
-      data: this.results,
+      data: this.resultsWithRetrieve,
       fields: fields
     });
 
@@ -150,8 +172,51 @@ export class CycleTest {
         throw err;
       console.log('file saved');
     });
+  }
+  _retrieve() {
+    Observable.interval(1000).take(10).subscribe(
+      (x) => {
+        console.log('Retrieve in: ' + (x + 1) + '/10');
+      },
+      null,
+      () => {
+        this.results.forEach(elem => {
+          this._getRetrieve_(elem);
+        });
+      }
+    )
+  }
 
+  _getRetrieve_(obj, observerR) {
+      Observable.create((observer) => {
+      console.log('Retreving');
+      // To broker identify that now is a Retrieve Mod
+      let clientId = 'retrieve#' + obj.clientId;
+      // Create a Mqtt Connection with the brokerIP
+      let client = new RxMqtt(this.brokerIP, {
+        clientId: clientId
+      });
 
-
+      client.on('message').subscribe(x => {
+        //console.log('' + x.message);
+        obj.sd.setDataFromBroker(x.message);
+        //console.log(this.sd.toString());
+        //The Observable is done
+        observer.next(obj.sd.getObjForCsv());
+        client.end();
+        observer.complete();
+      });
+    }).subscribe(
+      (x) => {
+        this.resultsWithRetrieve.push(x);
+        console.log('Push on resultsWithRetrieve');
+      },
+      null,
+      () => {
+        if (this.resultsWithRetrieve.length === this.results.length) {
+          this._saveDb();
+        }
+      }
+    );
   }
 }
