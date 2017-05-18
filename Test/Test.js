@@ -193,12 +193,6 @@ export class Test {
           queueQoSZero: false
         });
 
-        // Start Observable of TimeOut
-        this.testTimeOutSub = this.testTimeOut_.subscribe(null, null, () => {
-          console.log('TimeOut');
-          this._endForTimeOut(observer);
-        });
-
         //Observe a 'connect sucessful'
         this.client.on('connect').subscribe(x => {
 
@@ -208,6 +202,11 @@ export class Test {
             this.startAt = new Date().getTime();
             //Change state, now the test will run
             this.state = TEST_RUNNING;
+            // Start Observable of TimeOut
+            this.testTimeOutSub = this.testTimeOut_.subscribe(null, null, () => {
+              console.log('TimeOut');
+              this._endForTimeOut(observer);
+            })
             console.log('Connected,  test state: ' + this.state);
           }
 
