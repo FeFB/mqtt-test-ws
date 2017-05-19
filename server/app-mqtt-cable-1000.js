@@ -5,7 +5,7 @@ import {CycleTest} from '../Test';
 import {Util} from './Util';
 
 
-Util.setAmountPayload(50);
-Util.setPerPayload(100);
+Util.setAmountPayload(1000);
+Util.setPerPayload(10);
 
 new CycleTest(10, Util.valuesCable);

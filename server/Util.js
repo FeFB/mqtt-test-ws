@@ -8,7 +8,7 @@ var values = {
 
 export class Util {
   static get valuesCable() {
-    values.brokerIP = 'tcp://192.168.15.9:1883';
+    values.brokerIP = 'tcp://192.168.0.100:1883';
     return values;
   }
 
@@ -20,5 +20,13 @@ export class Util {
   static get valesAWS() {
     values.brokerIP = 'mqtt://34.208.230.82:1883'
     return values;
+  }
+
+  static setAmountPayload(amount) {
+    values.amountPayload = amount;
+  }
+
+  static setPerPayload(per) {
+    values.periodOfPublish = per;
   }
 }

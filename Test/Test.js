@@ -259,13 +259,13 @@ export class Test {
    * @return {Observable} [A Stream with the Retrieve Logic]
    */
   _startRetrieve(observer) {
-      let obj = {
-        state: 'WAIT_FOR_RETRIEVE',
-        clientId: this.clientId,
-        sd : this.sd
-      }
-      observer.next(obj);
-      observer.complete();
+    let obj = {
+      state: 'WAIT_FOR_RETRIEVE',
+      clientId: this.clientId,
+      sd: this.sd
+    }
+    observer.next(obj);
+    observer.complete();
   }
 
 }
